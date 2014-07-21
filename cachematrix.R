@@ -2,50 +2,57 @@
 ## caching the inverse of a matrix to avoid calculating it more than once.
 ##
 ## Sample usage:
-## m <- matrix(1:4, 2, 2)
-## cm <- makeCacheMatrix(m)
-## inv <- cacheSolve(cm)
+## mat <- matrix(1:4, 2, 2)
+## cachmat <- makeCacheMatrix(mat)
+## invmat <- cacheSolve(cachmat)
 
 ## 'makeCacheMatrix' returns a list that bundles a matrix and its inverse.
 ## The matrix can be accessed via '$get()' and changed via '$set()'.
 ## The inverse can be accessed via '$getInv()' and changed via '$setInv()'.
 
 makeCacheMatrix <- function(x = matrix()) {
-    # cached inverse
-    inv <- NULL
-
-    # accessors
-    get <- function() x
-    getInv <- function() inv
-
-    # mutators
-    set <- function(newX) {
-        x <<- newX
-        inv <<- NULL
-    }
-    setInv <- function(newInv) inv <<- newInv
-
-    # return the bundle
-    list(get = get, set = set,
-         getInv = getInv, setInv = setInv)
+  ##This function creates a special "matrix" object that can cache its inverse.
+  
+  # cached inverse
+    invmat <- NULL
+  
+  # access
+  get <- function() x
+  getInv <- function() invmat
+  
+  # mutate 
+  set <- function(newX) {
+    x <<- newX
+    invmat <<- NULL
+  }
+  setInv <- function(newInv) invmat <<- newInv
+  
+  # return 
+  list(get = get, set = set,
+       getInv = getInv, setInv = setInv)
 }
 
-
-## 'cacheSolve' accepts a matrix bundle created by 'makeCacheMatrix',
-## and returns the inverse of the matrix. It uses the inverse matrix cached
-## in the bundle if already calculated, otherwise it calculates and stores the
-## inverse. Any additional parameters are passed on to 'solve'.
+##This function computes the inverse of the special "matrix" returned
+##by makeCacheMatrix above. If the inverse has already been calculated 
+##(and the matrix has not changed), then cacheSolve should retrieve the 
+##inverse from the cache.
 
 cacheSolve <- function(x, ...) {
-    inv <- x$getInv()
-
-    # invert if necessary
-    if (is.null(inv)) {
-        m <- x$get()
-        inv <- solve(m, ...)
-        x$setInv(inv)
-    }
-
-    # return the inverse matrix
-    inv
+  invmat <- x$getInv()
+  
+  # invert if necessary
+  if (is.null(invmat)) {
+    
+    mat <- x$get()
+    invmat <- solve(mat, ...)
+    
+    ##solve function in R For example, if X is a square invertible matrix,
+    ##then solve(X) returns its inverse.
+    
+    x$setInv(invmat)
+  }
+  
+  # return the inverse matrix
+  
+  invmat
 }
